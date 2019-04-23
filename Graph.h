@@ -47,12 +47,14 @@ struct Edge
 	Vertex* u;
 	Vertex* v;
 	int weight;
+	EdgeType type;
 
 	Edge()
 	{
 		u = NULL;
 		v = NULL;
 		weight = 0;
+		type = UNCLASSIFIED;
 	}
 
 	Edge(Vertex& x, Vertex& y)
@@ -60,6 +62,7 @@ struct Edge
 		u = &x;
 		v = &y;
 		weight = 0;
+		type = UNCLASSIFIED;
 	}
 
 	Edge(Vertex& x, Vertex& y, int weightIn)
@@ -67,13 +70,15 @@ struct Edge
 		u = &x;
 		v = &y;
 		weight = weightIn;
+		type = UNCLASSIFIED;
 	}
 
 	bool operator==(const Edge& other)
 	{
 		return u == other.u &&
 			v == other.v &&
-			weight == other.weight;
+			weight == other.weight &&
+			type == other.type;
 	}
 };
 
@@ -92,6 +97,24 @@ ostream& operator<<(ostream& os, const Vertex* v)
 ostream& operator<<(ostream& os, const Edge& e)
 {
 	os << "(" << e.u << ", " << e.v << ")";
+	switch (e.type)
+	{
+	case UNCLASSIFIED:
+		cout << "U";
+		break;
+	case TREE:
+		cout << "T";
+		break;
+	case FORWARD:
+		cout << "F";
+		break;
+	case BACK:
+		cout << "B";
+		break;
+	case CROSS:
+		cout << "C";
+		break;
+	}
 	return os;
 }
 
@@ -108,6 +131,7 @@ private:
 	void addDirectedEdge(int vfrom, int vto);
 	void addUndirectedEdge(int u, int v);
 	bool searchEdge(int u, int v);
+	Edge* getEdge(int u, int v);
 
 public:
 	Graph();
@@ -118,10 +142,19 @@ public:
 	void addEdge(int u, int v);
 	void printAdjList();
 	void printEdgeList();
+	void printTimes();
 	void DFS();
 	void DFS(int u);
 	void BFS();
 	void BFS(int u);
+	bool isAncestor(int u, int v);
+	bool isParent(int u, int v);
+	bool isTreeEdge(int u, int v);
+	bool isBackEdge(int u, int v);
+	bool isForwardEdge(int u, int v);
+	bool isCrossEdge(int u, int v);
+	bool beenTraversed();
+	void classifyEdges();
 };
 
 Graph::Graph()
@@ -252,9 +285,29 @@ void Graph::printEdgeList()
 	edges.printHead();
 }
 
+void Graph::printTimes()
+{
+	cout << "vertex start/finish times:" << endl;
+	for (int i = 0; i < vertCount; i++)
+	{
+		cout << "V" << i << ": [" << verts[i].discovered << ", " << verts[i].finished << "]" << endl;
+	}
+}
+
 bool Graph::searchEdge(int u, int v)
 {
 	return adjList[u].searchKey(&verts[v]);
+}
+
+Edge* Graph::getEdge(int u, int v)
+{
+	Node<Edge>* listPtr = edges.getHeadPtr();
+	while (listPtr != NULL && (listPtr->key.u != &verts[u] && listPtr->key.v != &verts[v]))
+	{
+		listPtr = listPtr->next;
+	}
+
+	return listPtr != NULL ? &(listPtr->key) : NULL;
 }
 
 void Graph::DFS()
@@ -279,32 +332,37 @@ void Graph::DFS(int s)
 	if (s < vertCount)
 	{
 		cout << "depth first search: " << endl;
-		for (int i = 0; i < vertCount; i++)
-		{
-			verts[i].color = WHITE;
-			verts[i].parent = NULL;
-		}
 		int time = 0;
 		Stack<Vertex*> stack(vertCount);
 		stack.push(&verts[s]);
 		while (!stack.isEmpty())
 		{
 			Vertex* u = stack.top();
-			stack.pop();
 			if (u->color == WHITE)
 			{
 				cout << "visiting vertex " << u << endl;
 				u->color = GREY;
 				u->discovered = time++;
-			
+
 				for (int i = 0; i < adjList[u->id].size(); i++)
 				{
 					Vertex* v = adjList[u->id].get(i);
-					v->parent = u;
-					stack.push(v);
+					if (v->color == WHITE)
+					{
+						v->parent = u;
+						stack.push(v);
+					}
 				}
+			}
+			else if (u->color == GREY)
+			{
 				u->color = BLACK;
 				u->finished = time++;
+				stack.pop();
+			}
+			else
+			{
+				stack.pop();
 			}
 		}
 		cout << "finished." << endl;
@@ -333,34 +391,170 @@ void Graph::BFS(int s)
 	if (s < vertCount)
 	{
 		cout << "breadth first search:" << endl;
-		for (int i = 0; i < vertCount; i++)
-		{
-			verts[i].color = WHITE;
-			verts[i].parent = NULL;
-		}
 		int time = 0;
 		Queue<Vertex*> queue(vertCount);
 		queue.enqueue(&verts[s]);
 		while (!queue.isEmpty())
 		{
 			Vertex* u = queue.dequeue();
+
 			if (u->color == WHITE)
 			{
 				cout << "visiting vertex " << u << endl;
 				u->color = GREY;
 				u->discovered = time++;
-				
-				for (int i = 0; i < adjList[u->id].size(); i++)
+
+			}
+
+			for (int i = 0; i < adjList[u->id].size(); i++)
+			{
+				Vertex* v = adjList[u->id].get(i);
+				if (v->color == WHITE)
 				{
-					Vertex* v = adjList[u->id].get(i);
+					cout << "visiting vertex " << v << endl;
+					v->color = GREY;
+					v->discovered = time++;
 					v->parent = u;
 					queue.enqueue(v);
 				}
-				
+			}
+
+			if (u->color == GREY)
+			{
 				u->color = BLACK;
 				u->finished = time++;
 			}
 		}
 		cout << "finished." << endl;
+	}
+}
+
+bool Graph::isAncestor(int u, int v)  //is u an ancestor of v
+{
+	Vertex* p = verts[v].parent;
+	while (p != NULL && p != &verts[u])
+	{
+		p = p->parent;
+	}
+
+	if (p == NULL || p == verts[v].parent)
+	{
+		return false;
+	}
+	return true;
+}
+
+bool Graph::isParent(int u, int v) //is u the parent of v
+{
+	return verts[v].parent == &verts[u];
+}
+
+bool Graph::isTreeEdge(int u, int v)
+{
+	if (beenTraversed() && searchEdge(u, v))
+	{
+		if (isParent(u, v))
+		{
+			return true;
+		}
+		return false;
+	}
+	else
+	{
+		cout << "invalid edge" << endl;
+		return false;
+	}
+}
+
+bool Graph::isBackEdge(int u, int v)
+{
+	if (beenTraversed() && searchEdge(u, v))
+	{
+		if (isAncestor(v, u) || u == v)
+		{
+			return true;
+		}
+		return false;
+	}
+	else
+	{
+		cout << "invalid edge" << endl;
+		return false;
+	}
+}
+
+bool Graph::isForwardEdge(int u, int v)
+{
+	if (beenTraversed() && searchEdge(u, v))
+	{
+		if (isAncestor(u, v))
+		{
+			return true;
+		}
+		return false;
+	}
+	else
+	{
+		cout << "invalid edge" << endl;
+		return false;
+	}
+}
+
+bool Graph::isCrossEdge(int u, int v)
+{
+	if (beenTraversed() && searchEdge(u, v))
+	{
+		if (!isAncestor(u, v))
+		{
+			return true;
+		}
+		return false;
+	}
+	else
+	{
+		cout << "invalid edge" << endl;
+		return false;
+	}
+}
+
+bool Graph::beenTraversed()
+{
+	for (int i = 0; i < vertCount; i++)
+	{
+		if (verts[i].color != BLACK)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+void Graph::classifyEdges()
+{
+	if (beenTraversed())
+	{
+		Node<Edge>* listNode = edges.getHeadPtr();
+		while (listNode != NULL)
+		{
+			int u = listNode->key.u->id;
+			int v = listNode->key.v->id;
+			if (isTreeEdge(u, v))
+			{
+				listNode->key.type = TREE;
+			}
+			else if (isBackEdge(u, v))
+			{
+				listNode->key.type = BACK;
+			}
+			else if (isForwardEdge(u, v))
+			{
+				listNode->key.type = FORWARD;
+			}
+			else if (isCrossEdge(u, v))
+			{
+				listNode->key.type = CROSS;
+			}
+			listNode = listNode->next;
+		}
 	}
 }

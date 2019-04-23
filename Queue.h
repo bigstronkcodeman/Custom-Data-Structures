@@ -23,6 +23,7 @@ public:
 
 	bool enqueue(Data key);
 	Data dequeue();
+	Data getFront();
 	void print();
 	bool isFull();
 	bool isEmpty();
@@ -95,6 +96,12 @@ Data Queue<Data>::dequeue()
 	}
 	cout << "Queue underflow, exiting\n";
 	exit(1);
+}
+
+template<class Data>
+Data Queue<Data>::getFront()
+{
+	return queue[front];
 }
 
 template<class Data>
