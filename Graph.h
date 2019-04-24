@@ -157,6 +157,8 @@ public:
 	void classifyEdges();
 	void transpose();
 	void reset();
+	bool isAcyclic();
+	LinkedList<Vertex> topologicalSort();
 };
 
 Graph::Graph()
@@ -558,15 +560,6 @@ void Graph::transpose() //performs an in-place transpose on a directed graph, re
 	if (directed)
 	{
 		reset();
-		bool** transposed = new bool*[vertCount];
-		for (int i = 0; i < vertCount; i++)
-		{
-			transposed[i] = new bool[vertCount];
-			for (int j = 0; j < vertCount; j++)
-			{
-				transposed[i][j] = false;
-			}
-		}
 
 		int* adjSize = new int[vertCount];
 		for (int i = 0; i < vertCount; i++)
@@ -574,31 +567,22 @@ void Graph::transpose() //performs an in-place transpose on a directed graph, re
 			adjSize[i] = adjList[i].size();
 		}
 
-		for (int i = 0; i < vertCount; i++)
+		for (int i = 0; i < vertCount; i++) 
 		{
-			int numRemovals = 0;
-			while (!adjList[i].isEmpty() && numRemovals < adjSize[i])
+			int numRemovals = 0; 
+			while (numRemovals < adjSize[i]) 
 			{
 				Vertex* u = adjList[i].getHead();
-				if (!transposed[u->id][i])
-				{
-					adjList[i].deleteHead();
-					numRemovals++;
-					adjList[u->id].insertTail(&verts[i]);
-					Edge* e = getEdge(i, u->id);
-					transposed[i][u->id] = true;
-					Vertex* temp = e->u;
-					e->u = e->v;
-					e->v = temp;
-				}
+				adjList[i].deleteHead();
+				numRemovals++;
+				adjList[u->id].insertTail(&verts[i]);
+				Edge* e = getEdge(i, u->id);
+				Vertex* temp = e->u;
+				e->u = e->v;
+				e->v = temp;
 			}
 		}
 
-		for (int i = 0; i < vertCount; i++)
-		{
-			delete[] transposed[i];
-		}
-		delete[] transposed;
 		delete[] adjSize;
 	}
 	else
@@ -619,7 +603,7 @@ void Graph::reset()
 
 	Node<Edge>* listPtr = edges.getHeadPtr();
 
-	if (listPtr->key.type == UNCLASSIFIED)
+	if (listPtr->key.type == UNCLASSIFIED) //if some edges are unclassified, then they must all be
 	{
 		return;
 	}
@@ -629,4 +613,23 @@ void Graph::reset()
 		listPtr->key.type = UNCLASSIFIED;
 		listPtr = listPtr->next;
 	}
+}
+
+bool Graph::isAcyclic()
+{
+	if (!beenTraversed())
+	{
+		DFS();
+	}
+
+	Node<Edge>* listPtr = edges.getHeadPtr();
+	while (listPtr != NULL)
+	{
+		if (listPtr->key.type == BACK)
+		{
+			return false;
+		}
+		listPtr = listPtr->next;
+	}
+	return true;
 }

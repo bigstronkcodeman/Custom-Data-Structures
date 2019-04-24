@@ -22,6 +22,7 @@ int main()
 	g.printEdgeList();
 
 	cout << "\ntransposing...\n\n";
+
 	g.transpose();
 	g.printEdgeList();
 	g.printAdjList();
