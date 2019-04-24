@@ -15,10 +15,22 @@ int main()
 	g.addEdge(5, 5);
 	g.printEdgeList();
 	g.printAdjList();
-	g.DFS();
-	g.printTimes();
+	g.DFS(0);
+	g.DFS(2);
 	g.classifyEdges();
+	g.printTimes();
 	g.printEdgeList();
+
+	cout << "\ntransposing...\n\n";
+	g.transpose();
+	g.printEdgeList();
+	g.printAdjList();
+	g.DFS(1);
+	g.DFS(5);
+	g.classifyEdges();
+	g.printTimes();
+	g.printEdgeList();
+
 
 	return 0;
 }

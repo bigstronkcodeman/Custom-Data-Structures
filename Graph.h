@@ -130,7 +130,6 @@ private:
 
 	void addDirectedEdge(int vfrom, int vto);
 	void addUndirectedEdge(int u, int v);
-	bool searchEdge(int u, int v);
 	Edge* getEdge(int u, int v);
 
 public:
@@ -147,6 +146,7 @@ public:
 	void DFS(int u);
 	void BFS();
 	void BFS(int u);
+	bool searchEdge(int u, int v);
 	bool isAncestor(int u, int v);
 	bool isParent(int u, int v);
 	bool isTreeEdge(int u, int v);
@@ -155,6 +155,8 @@ public:
 	bool isCrossEdge(int u, int v);
 	bool beenTraversed();
 	void classifyEdges();
+	void transpose();
+	void reset();
 };
 
 Graph::Graph()
@@ -302,7 +304,7 @@ bool Graph::searchEdge(int u, int v)
 Edge* Graph::getEdge(int u, int v)
 {
 	Node<Edge>* listPtr = edges.getHeadPtr();
-	while (listPtr != NULL && (listPtr->key.u != &verts[u] && listPtr->key.v != &verts[v]))
+	while (listPtr != NULL && (listPtr->key.u != &verts[u] || listPtr->key.v != &verts[v]))
 	{
 		listPtr = listPtr->next;
 	}
@@ -312,11 +314,7 @@ Edge* Graph::getEdge(int u, int v)
 
 void Graph::DFS()
 {
-	for (int i = 0; i < vertCount; i++)
-	{
-		verts[i].color = WHITE;
-		verts[i].parent = NULL;
-	}
+	reset();
 
 	for (int i = 0; i < vertCount; i++)
 	{
@@ -371,11 +369,7 @@ void Graph::DFS(int s)
 
 void Graph::BFS()
 {
-	for (int i = 0; i < vertCount; i++)
-	{
-		verts[i].color = WHITE;
-		verts[i].parent = NULL;
-	}
+	reset();
 
 	for (int i = 0; i < vertCount; i++)
 	{
@@ -429,7 +423,7 @@ void Graph::BFS(int s)
 	}
 }
 
-bool Graph::isAncestor(int u, int v)  //is u an ancestor of v
+bool Graph::isAncestor(int u, int v)  //is u an ancestor of v ?
 {
 	Vertex* p = verts[v].parent;
 	while (p != NULL && p != &verts[u])
@@ -444,7 +438,7 @@ bool Graph::isAncestor(int u, int v)  //is u an ancestor of v
 	return true;
 }
 
-bool Graph::isParent(int u, int v) //is u the parent of v
+bool Graph::isParent(int u, int v) //is u the parent of v ?
 {
 	return verts[v].parent == &verts[u];
 }
@@ -517,7 +511,7 @@ bool Graph::isCrossEdge(int u, int v)
 	}
 }
 
-bool Graph::beenTraversed()
+bool Graph::beenTraversed()  //have we finished visiting every node ?
 {
 	for (int i = 0; i < vertCount; i++)
 	{
@@ -556,5 +550,83 @@ void Graph::classifyEdges()
 			}
 			listNode = listNode->next;
 		}
+	}
+}
+
+void Graph::transpose() //performs an in-place transpose on a directed graph, reversing the direction of all edges
+{
+	if (directed)
+	{
+		reset();
+		bool** transposed = new bool*[vertCount];
+		for (int i = 0; i < vertCount; i++)
+		{
+			transposed[i] = new bool[vertCount];
+			for (int j = 0; j < vertCount; j++)
+			{
+				transposed[i][j] = false;
+			}
+		}
+
+		int* adjSize = new int[vertCount];
+		for (int i = 0; i < vertCount; i++)
+		{
+			adjSize[i] = adjList[i].size();
+		}
+
+		for (int i = 0; i < vertCount; i++)
+		{
+			int numRemovals = 0;
+			while (!adjList[i].isEmpty() && numRemovals < adjSize[i])
+			{
+				Vertex* u = adjList[i].getHead();
+				if (!transposed[u->id][i])
+				{
+					adjList[i].deleteHead();
+					numRemovals++;
+					adjList[u->id].insertTail(&verts[i]);
+					Edge* e = getEdge(i, u->id);
+					transposed[i][u->id] = true;
+					Vertex* temp = e->u;
+					e->u = e->v;
+					e->v = temp;
+				}
+			}
+		}
+
+		for (int i = 0; i < vertCount; i++)
+		{
+			delete[] transposed[i];
+		}
+		delete[] transposed;
+		delete[] adjSize;
+	}
+	else
+	{
+		cout << "cannot transpose undirected graph" << endl;
+	}
+}
+
+void Graph::reset()
+{
+	for (int i = 0; i < vertCount; i++)
+	{
+		verts[i].color = WHITE;
+		verts[i].discovered = INF;
+		verts[i].finished = INF;
+		verts[i].parent = NULL;
+	}
+
+	Node<Edge>* listPtr = edges.getHeadPtr();
+
+	if (listPtr->key.type == UNCLASSIFIED)
+	{
+		return;
+	}
+
+	while (listPtr != NULL)
+	{
+		listPtr->key.type = UNCLASSIFIED;
+		listPtr = listPtr->next;
 	}
 }

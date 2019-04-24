@@ -45,6 +45,7 @@ public:
 	Data get(int i);
 	Data* getPtr(int i);
 	int size();
+	bool isEmpty();
 	bool searchKey(Data key);
 	Node<Data>* getHeadPtr();
 };
@@ -158,9 +159,17 @@ bool LinkedList<Data>::deleteKey(Data key)
 template<class Data>
 bool LinkedList<Data>::deleteHead()
 {
+	if (head == tail)
+	{
+		delete head;
+		head = NULL;
+		tail = NULL;
+		count--;
+		return true;
+	}
 	if (head != NULL)
 	{
-		Node* ptr = head;
+		Node<Data>* ptr = head;
 		head = head->next;
 		head->prev = NULL;
 		delete ptr;
@@ -173,9 +182,17 @@ bool LinkedList<Data>::deleteHead()
 template<class Data>
 bool LinkedList<Data>::deleteTail()
 {
+	if (tail == head)
+	{
+		delete tail;
+		tail = NULL;
+		head = NULL;
+		count--;
+		return true;
+	}
 	if (tail != NULL)
 	{
-		Node* ptr = tail;
+		Node<Data>* ptr = tail;
 		tail = tail->prev;
 		tail->next = NULL;
 		delete ptr;
@@ -238,6 +255,12 @@ template<class Data>
 int LinkedList<Data>::size()
 {
 	return count;
+}
+
+template<class Data>
+bool LinkedList<Data>::isEmpty()
+{
+	return count == 0;
 }
 
 template<class Data>
