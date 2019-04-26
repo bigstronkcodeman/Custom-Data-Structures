@@ -1,6 +1,10 @@
 #include "Graph.h"
-
+#include "DynamicArray.h"
+#include "DisjointSet.h"
+#include <string>
 using namespace std;
+
+
 
 int main()
 {
@@ -31,6 +35,34 @@ int main()
 	g.classifyEdges();
 	g.printTimes();
 	g.printEdgeList();
+
+	
+	
+	
+	/*DynamicArray<DynamicArray<int>> da(1);
+	for (int i = 0; i < 10; i++)
+	{
+		DynamicArray<int> ints(1);
+		da.append(ints);
+		for (int j = i; j < i + 10; j++)
+		{
+			da[i].append(j);
+		}
+	}
+	da.print();*/
+
+	/*DisjointSet<int> ds;
+	for (int i = 0; i < 15; i++)
+	{
+		ds.makeSet(i);
+	}
+	ds.Union(0, 1);
+	ds.Union(3, 2);
+	ds.Union(2, 1);
+	ds.Union(5, 1);
+	ds.Union(10, 14);
+	ds.Union(9, 10);
+	ds.print();*/
 
 
 	return 0;

@@ -146,7 +146,7 @@ bool LinkedList<Data>::deleteKey(Data key)
 	{
 		head = ptr->next;
 	}
-	
+
 	if (ptr->next != NULL) ptr->next->prev = ptr->prev;
 	if (ptr->prev != NULL) ptr->prev->next = ptr->next;
 
@@ -234,7 +234,7 @@ void LinkedList<Data>::printHead()
 {
 	for (Node<Data>* ptr = head; ptr != NULL; ptr = ptr->next)
 	{
-		cout << ptr->key << " -> "; //gotta overload cout << operator for objects to use print
+		cout << ptr->key << " -> "; //must overload cout << operator for objects to use print
 	}
 	cout << "X" << endl;
 }
@@ -246,7 +246,7 @@ void LinkedList<Data>::printTail()
 	Node<Data>* ptr = tail;
 	for (ptr; ptr->prev != NULL; ptr = ptr->prev)
 	{
-		cout << ptr->key << " <- "; //gotta overload cout << operator for objects to use print
+		cout << ptr->key << " <- "; //must overload cout << operator for objects to use print
 	}
 	cout << ptr->key << endl;
 }

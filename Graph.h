@@ -2,6 +2,7 @@
 #include "LinkedList.h"
 #include "Stack.h"
 #include "Queue.h"
+#include "DynamicArray.h"
 
 #define DEFAULT_GRAPH_SIZE 10
 #define INF 2147483647
@@ -31,6 +32,15 @@ struct Vertex
 	int discovered;
 	int finished;
 	Color color;
+
+	void operator=(const Vertex& other)
+	{
+		parent = other.parent;
+		id = other.id;
+		discovered = other.discovered;
+		finished = other.finished;
+		color = other.color;
+	}
 
 	bool operator==(const Vertex& other)
 	{
@@ -80,6 +90,14 @@ struct Edge
 			weight == other.weight &&
 			type == other.type;
 	}
+
+	void operator=(const Edge& other)
+	{
+		u = other.u;
+		v = other.v;
+		weight = other.weight;
+		type = other.type;
+	}
 };
 
 ostream& operator<<(ostream& os, const Vertex& v)
@@ -125,7 +143,7 @@ private:
 	int edgeCount;
 	bool directed;
 	LinkedList<Vertex*>* adjList;
-	LinkedList<Edge> edges;
+	DynamicArray<Edge> edges;
 	Vertex* verts;
 
 	void addDirectedEdge(int vfrom, int vto);
@@ -158,7 +176,6 @@ public:
 	void transpose();
 	void reset();
 	bool isAcyclic();
-	LinkedList<Vertex> topologicalSort();
 };
 
 Graph::Graph()
@@ -250,7 +267,7 @@ void Graph::addDirectedEdge(int vfrom, int vto)
 {
 	if (vfrom < vertCount && vto < vertCount)
 	{
-		edges.insertTail(Edge(verts[vfrom], verts[vto]));
+		edges.append(Edge(verts[vfrom], verts[vto]));
 		adjList[vfrom].insertTail(&verts[vto]);
 	}
 	else
@@ -263,7 +280,7 @@ void Graph::addUndirectedEdge(int u, int v)
 {
 	if (u < vertCount && v < vertCount)
 	{
-		edges.insertTail(Edge(verts[u], verts[v]));
+		edges.append(Edge(verts[u], verts[v]));
 		adjList[u].insertTail(&verts[v]);
 		adjList[v].insertTail(&verts[u]);
 	}
@@ -285,8 +302,8 @@ void Graph::printAdjList()
 
 void Graph::printEdgeList()
 {
-	cout << "edge list: ";
-	edges.printHead();
+	cout << "edge list: \n";
+	edges.print();
 }
 
 void Graph::printTimes()
@@ -305,13 +322,15 @@ bool Graph::searchEdge(int u, int v)
 
 Edge* Graph::getEdge(int u, int v)
 {
-	Node<Edge>* listPtr = edges.getHeadPtr();
-	while (listPtr != NULL && (listPtr->key.u != &verts[u] || listPtr->key.v != &verts[v]))
+	for (int i = 0; i < edges.length(); i++)
 	{
-		listPtr = listPtr->next;
+		if (edges[i].u == &verts[u] && edges[i].v == &verts[v])
+		{
+			return &edges[i];
+		}
 	}
 
-	return listPtr != NULL ? &(listPtr->key) : NULL;
+	return NULL;
 }
 
 void Graph::DFS()
@@ -529,28 +548,26 @@ void Graph::classifyEdges()
 {
 	if (beenTraversed())
 	{
-		Node<Edge>* listNode = edges.getHeadPtr();
-		while (listNode != NULL)
+		for (int i = 0; i < edges.length(); i++)
 		{
-			int u = listNode->key.u->id;
-			int v = listNode->key.v->id;
+			int u = edges[i].u->id;
+			int v = edges[i].v->id;
 			if (isTreeEdge(u, v))
 			{
-				listNode->key.type = TREE;
+				edges[i].type = TREE;
 			}
 			else if (isBackEdge(u, v))
 			{
-				listNode->key.type = BACK;
+				edges[i].type = BACK;
 			}
 			else if (isForwardEdge(u, v))
 			{
-				listNode->key.type = FORWARD;
+				edges[i].type = FORWARD;
 			}
 			else if (isCrossEdge(u, v))
 			{
-				listNode->key.type = CROSS;
+				edges[i].type = CROSS;
 			}
-			listNode = listNode->next;
 		}
 	}
 }
@@ -567,10 +584,10 @@ void Graph::transpose() //performs an in-place transpose on a directed graph, re
 			adjSize[i] = adjList[i].size();
 		}
 
-		for (int i = 0; i < vertCount; i++) 
+		for (int i = 0; i < vertCount; i++)
 		{
-			int numRemovals = 0; 
-			while (numRemovals < adjSize[i]) 
+			int numRemovals = 0;
+			while (numRemovals < adjSize[i])
 			{
 				Vertex* u = adjList[i].getHead();
 				adjList[i].deleteHead();
@@ -601,17 +618,15 @@ void Graph::reset()
 		verts[i].parent = NULL;
 	}
 
-	Node<Edge>* listPtr = edges.getHeadPtr();
 
-	if (listPtr->key.type == UNCLASSIFIED) //if some edges are unclassified, then they must all be
+	if (edges[0].type == UNCLASSIFIED) //if some edges are unclassified, then they must all be
 	{
 		return;
 	}
 
-	while (listPtr != NULL)
+	for (int i = 0; i < edges.length(); i++)
 	{
-		listPtr->key.type = UNCLASSIFIED;
-		listPtr = listPtr->next;
+		edges[i].type = UNCLASSIFIED;
 	}
 }
 
@@ -622,14 +637,12 @@ bool Graph::isAcyclic()
 		DFS();
 	}
 
-	Node<Edge>* listPtr = edges.getHeadPtr();
-	while (listPtr != NULL)
+	for (int i = 0; i < edges.length(); i++)
 	{
-		if (listPtr->key.type == BACK)
+		if (edges[i].type == BACK)
 		{
 			return false;
 		}
-		listPtr = listPtr->next;
 	}
 	return true;
 }

@@ -230,3 +230,16 @@ int DynamicArray<Data>::length()
 {
 	return size;
 }
+
+
+
+template<class Data>
+ostream& operator<<(ostream& os, DynamicArray<Data> da)
+{
+	for (int i = 0; i < da.length(); i++)
+	{
+		os << da[i] << " ";
+	}
+	os << endl;
+	return os;
+}

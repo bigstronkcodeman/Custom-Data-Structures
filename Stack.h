@@ -39,7 +39,7 @@ Stack<Data>::Stack(int sizeIn)
 {
 	size = sizeIn;
 	stack = new Data[size];
-	topi = 0; 
+	topi = 0;
 }
 
 template <class Data>
