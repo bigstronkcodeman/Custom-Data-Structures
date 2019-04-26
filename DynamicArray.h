@@ -122,7 +122,8 @@ void DynamicArray<Data>::append(Data e)
 	{
 		extend();
 	}
-	arr[size++] = e;
+	arr[size] = e;
+	size++;
 }
 
 template<class Data>

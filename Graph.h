@@ -3,6 +3,7 @@
 #include "Stack.h"
 #include "Queue.h"
 #include "DynamicArray.h"
+#include "DisjointSet.h"
 
 #define DEFAULT_GRAPH_SIZE 10
 #define INF 2147483647
@@ -114,6 +115,7 @@ ostream& operator<<(ostream& os, const Vertex* v)
 
 ostream& operator<<(ostream& os, const Edge& e)
 {
+	os << "<" << e.weight << ">";
 	os << "(" << e.u << ", " << e.v << ")";
 	switch (e.type)
 	{
@@ -146,8 +148,8 @@ private:
 	DynamicArray<Edge> edges;
 	Vertex* verts;
 
-	void addDirectedEdge(int vfrom, int vto);
-	void addUndirectedEdge(int u, int v);
+	void addDirectedEdge(int vfrom, int vto, int weight);
+	void addUndirectedEdge(int u, int v, int weight);
 	Edge* getEdge(int u, int v);
 
 public:
@@ -156,7 +158,7 @@ public:
 	Graph(int size, bool isDirected);
 	~Graph();
 
-	void addEdge(int u, int v);
+	void addEdge(int u, int v, int weight = 0);
 	void printAdjList();
 	void printEdgeList();
 	void printTimes();
@@ -176,6 +178,8 @@ public:
 	void transpose();
 	void reset();
 	bool isAcyclic();
+	void sortEdges();
+	DynamicArray<Edge> kruskalMST();
 };
 
 Graph::Graph()
@@ -242,20 +246,19 @@ Graph::~Graph()
 	delete[] verts;
 }
 
-void Graph::addEdge(int u, int v)
+void Graph::addEdge(int u, int v, int weight)
 {
 	if (!searchEdge(u, v))
 	{
 		if (directed)
 		{
-			addDirectedEdge(u, v);
-			edgeCount++;
+			addDirectedEdge(u, v, weight);
 		}
 		else
 		{
-			addUndirectedEdge(u, v);
-			edgeCount++;
+			addUndirectedEdge(u, v, weight);
 		}
+		edgeCount++;
 	}
 	else
 	{
@@ -263,11 +266,11 @@ void Graph::addEdge(int u, int v)
 	}
 }
 
-void Graph::addDirectedEdge(int vfrom, int vto)
+void Graph::addDirectedEdge(int vfrom, int vto, int weight)
 {
 	if (vfrom < vertCount && vto < vertCount)
 	{
-		edges.append(Edge(verts[vfrom], verts[vto]));
+		edges.append(Edge(verts[vfrom], verts[vto], weight));
 		adjList[vfrom].insertTail(&verts[vto]);
 	}
 	else
@@ -276,11 +279,11 @@ void Graph::addDirectedEdge(int vfrom, int vto)
 	}
 }
 
-void Graph::addUndirectedEdge(int u, int v)
+void Graph::addUndirectedEdge(int u, int v, int weight)
 {
 	if (u < vertCount && v < vertCount)
 	{
-		edges.append(Edge(verts[u], verts[v]));
+		edges.append(Edge(verts[u], verts[v], weight));
 		adjList[u].insertTail(&verts[v]);
 		adjList[v].insertTail(&verts[u]);
 	}
@@ -645,4 +648,42 @@ bool Graph::isAcyclic()
 		}
 	}
 	return true;
+}
+
+void Graph::sortEdges() //insertion sort because lazy
+{
+	for (int i = 1; i < edges.length(); i++)
+	{
+		Edge e = edges[i];
+		int k = i - 1;
+		while (k >= 0 && edges[k].weight > e.weight)
+		{
+			edges[k + 1] = edges[k];
+			k--;
+		}
+		edges[k + 1] = e;
+	}
+}
+
+
+DynamicArray<Edge> Graph::kruskalMST()
+{
+	DisjointSet<Vertex> ds;
+	for (int i = 0; i < vertCount; i++)
+	{
+		ds.makeSet(verts[i]);
+	}
+
+	sortEdges();
+
+	DynamicArray<Edge> MST;
+	for (int i = 0; i < edges.length(); i++)
+	{
+		if (ds.find(edges[i].u->id) != ds.find(edges[i].v->id))
+		{
+			MST.append(edges[i]);
+			ds.Union(edges[i].u->id, edges[i].v->id);
+		}
+	}
+	return MST;
 }

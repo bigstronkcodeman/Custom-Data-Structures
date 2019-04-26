@@ -1,40 +1,32 @@
 #include "Graph.h"
 #include "DynamicArray.h"
-#include "DisjointSet.h"
-#include <string>
+#include <cstdlib>
+#include <chrono>
 using namespace std;
 
 
 
 int main()
 {
-	Graph g(6, true);
-	g.addEdge(0, 3);
-	g.addEdge(0, 1);
-	g.addEdge(1, 4);
-	g.addEdge(2, 5);
-	g.addEdge(2, 4);
-	g.addEdge(3, 1);
-	g.addEdge(4, 3);
-	g.addEdge(5, 5);
-	g.printEdgeList();
+	Graph g(9, false);
+	g.addEdge(0, 1, 10);
+	g.addEdge(0, 2, 12);
+	g.addEdge(1, 2, 9);
+	g.addEdge(1, 3, 8);
+	g.addEdge(3, 6, 8);
+	g.addEdge(3, 4, 7);
+	g.addEdge(4, 2, 3);
+	g.addEdge(4, 5, 3);
+	g.addEdge(2, 5, 1);
+	g.addEdge(5, 7, 6);
+	g.addEdge(3, 7, 5);
+	g.addEdge(6, 8, 2);
+	g.addEdge(7, 8, 11);
+	g.addEdge(6, 7, 9);
 	g.printAdjList();
-	g.DFS(0);
-	g.DFS(2);
-	g.classifyEdges();
-	g.printTimes();
-	g.printEdgeList();
-
-	cout << "\ntransposing...\n\n";
-
-	g.transpose();
-	g.printEdgeList();
-	g.printAdjList();
-	g.DFS(1);
-	g.DFS(5);
-	g.classifyEdges();
-	g.printTimes();
-	g.printEdgeList();
+	DynamicArray<Edge> MST = g.kruskalMST();
+	cout << "minimum spanning tree edges: " << endl;
+	MST.print();
 
 	
 	
@@ -51,19 +43,33 @@ int main()
 	}
 	da.print();*/
 
-	/*DisjointSet<int> ds;
-	for (int i = 0; i < 15; i++)
+	/*int eles;
+	cout << "Enter a number of elements: ";
+	cin >> eles;
+	DisjointSet<int> ds;
+	for (int i = 0; i < eles; i++)
 	{
 		ds.makeSet(i);
 	}
-	ds.Union(0, 1);
-	ds.Union(3, 2);
-	ds.Union(2, 1);
-	ds.Union(5, 1);
-	ds.Union(10, 14);
-	ds.Union(9, 10);
-	ds.print();*/
 
+	char choice;
+	do
+	{
+		choice = 'y';
+		cout << "Union? (y/n): ";
+		cin >> choice;
+
+		if (choice == 'y')
+		{
+			int e1, e2;
+			cout << "Element 1: ";
+			cin >> e1;
+			cout << "Element 2: ";
+			cin >> e2;
+			ds.Union(e1, e2);
+			ds.print();
+		}
+	} while (choice == 'y');*/
 
 	return 0;
 }

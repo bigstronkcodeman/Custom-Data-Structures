@@ -32,7 +32,7 @@ public:
 };
 
 template<class Data>
-DisjointSet<Data>::DisjointSet() : sets(), numElements(0), numSets(0) {}
+DisjointSet<Data>::DisjointSet() : numElements(0), numSets(0) {}
 
 template<class Data>
 DisjointSet<Data>::DisjointSet(Data in[])
@@ -75,6 +75,11 @@ int DisjointSet<Data>::find(int i)
 template<class Data>
 bool DisjointSet<Data>::Union(int i, int j)
 {
+	if (i >= numElements || j >= numElements)
+	{
+		return false;
+	}
+
 	int iRoot = find(i);
 	int jRoot = find(j);
 
