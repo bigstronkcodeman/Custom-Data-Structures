@@ -218,12 +218,16 @@ void PairingHeap<Data>::decreaseKey(Data key, Data newKey)
 		/*p is parent of node whose key we are going to decrease*/
 		HeapNode<Data>* p = parent(key);
 
+		/*Make a new pointer to the node to be decreased, we are going to sever
+		its link from the tree*/
+		HeapNode<Data>* severedRoot;
+
 		/*If the node to be decreased is the left most child of p, then... */
 		if (p->left->key == key)
-		{
-			/*Make a new pointer to the node to be decreased, we are going to sever
-			its link from the tree*/
-			HeapNode<Data>* severedRoot = p->left;
+		{ 
+			/*Sever the subtree whose root is the node to be decreased
+		    from the tree*/
+			severedRoot = p->left;
 			p->left = p->left->sibling;
 			severedRoot->sibling = NULL;
 
@@ -231,35 +235,6 @@ void PairingHeap<Data>::decreaseKey(Data key, Data newKey)
 			from the tree, we can decrease it's key without issue (it is the root
 			of its own tree now)*/
 			severedRoot->key = newKey;
-
-			/*If p is not the root, ...*/
-			if (p != root)
-			{
-				/*We need to find the grandparent of p, so that we can make
-				him point to the heap resulted from merging p and the severed root
-				instead of p. Although if p is not his leftmost child, we will actually
-				be changing the left sibling of p to point to the heap resulting from 
-				merging p and the severed root.*/
-				HeapNode<Data>* gp = parent(p->key);
-				if (gp->left == p)
-				{
-					gp->left = merge(severedRoot, p);
-				}
-				else
-				{
-					HeapNode<Data>* gpc = gp->left;
-					while (gpc->sibling != p)
-					{
-						gpc = gpc->sibling;
-					}
-					gpc->sibling = merge(severedRoot, p);
-				}
-			}
-			else
-			{
-				/*p is the root, so we just change it to point to the root of the merged heaps.*/
-				root = merge(severedRoot, p);
-			}
 		}
 		else
 		{
@@ -273,39 +248,39 @@ void PairingHeap<Data>::decreaseKey(Data key, Data newKey)
 
 			/*Sever the subtree rooted at the node whose key we wish to decrease
 			so we can decrease the key without consequence.*/
-			HeapNode<Data>* severedRoot = pc->sibling;
+			severedRoot = pc->sibling;
 			pc->sibling = severedRoot->sibling;
 			severedRoot->sibling = NULL;
 			severedRoot->key = newKey;
+		}
 
-			/*If p is not the root, ...*/
-			if (p != root)
+		/*If p is not the root, ...*/
+		if (p != root)
+		{
+			/*We need to find the grandparent of p, so that we can make
+			him point to the heap resulted from merging p and the severed root
+			instead of p. Although if p is not his leftmost child, we will actually
+			be changing the left sibling of p to point to the heap resulting from
+			merging p and the severed root.*/
+			HeapNode<Data>* gp = parent(p->key);
+			if (gp->left == p)
 			{
-				/*We need to find the grandparent of p, so that we can make
-				him point to the heap resulted from merging p and the severed root
-				instead of p. Although if p is not his leftmost child, we will actually
-				be changing the left sibling of p to point to the heap resulting from 
-				merging p and the severed root.*/
-				HeapNode<Data>* gp = parent(p->key);
-				if (gp->left == p)
-				{
-					gp->left = merge(severedRoot, p);
-				}
-				else
-				{
-					HeapNode<Data>* gpc = gp->left;
-					while (gpc->sibling != p)
-					{
-						gpc = gpc->sibling;
-					}
-					gpc->sibling = merge(severedRoot, p);
-				}
+				gp->left = merge(severedRoot, p);
 			}
 			else
 			{
-				/*p is the root, so we just change it to point to the root of the merged heaps.*/
-				root = merge(severedRoot, p);
+				HeapNode<Data>* gpc = gp->left;
+				while (gpc->sibling != p)
+				{
+					gpc = gpc->sibling;
+				}
+				gpc->sibling = merge(severedRoot, p);
 			}
+		}
+		else
+		{
+			/*p is the root, so we just change it to point to the root of the merged heaps.*/
+			root = merge(severedRoot, p);
 		}
 	}
 }
