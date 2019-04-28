@@ -281,7 +281,9 @@ void PairingHeap<Data>::decreaseKey(Data key, Data newKey)
 			{
 				/*We need to find the grandparent of p, so that we can make
 				him point to the heap resulted from merging p and the severed root
-				instead of p.*/
+				instead of p. Although if p is not his leftmost child, we will actually
+				be changing the left sibling of p to point to the heap resulting from 
+				merging p and the severed root.*/
 				HeapNode<Data>* gp = parent(p->key);
 				if (gp->left == p)
 				{
