@@ -200,6 +200,7 @@ HeapNode<Data>* PairingHeap<Data>::parentHelper(HeapNode<Data>* tbf, HeapNode<Da
 {
 	if (node == NULL || (node == root && root == tbf))
 	{
+//see line 254
 		return NULL;
 	}
 
