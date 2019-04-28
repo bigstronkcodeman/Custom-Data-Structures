@@ -149,8 +149,10 @@ int PairingHeap<Data>::size()
 }
 
 
-/*Does what is essentially a depth first search of the tree, starting from the root,
-to find the parent of node with a specific key*/
+/*Does a sort of mix of breadth-first and depth-first search on the
+tree to find the parent of node with a specific key (start at root node, look at
+its children. if none of them are the key we're looking for, repeat this process for any
+child that has its own children)*/
 template<class Data>
 HeapNode<Data>* PairingHeap<Data>::parentHelper(Data key, HeapNode<Data>* node)
 {
