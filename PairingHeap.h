@@ -29,6 +29,7 @@ private:
 
 	HeapNode<Data>* merge(HeapNode<Data>* h1, HeapNode<Data>* h2);
 	HeapNode<Data>* mergePairs(HeapNode<Data>* h);
+	HeapNode<Data>* parentHelper(Data key, HeapNode<Data>* node);
 	void destructHelper(HeapNode<Data>* node);
 
 public:
@@ -41,7 +42,6 @@ public:
 	int size();
 	void decreaseKey(Data key, Data newKey);
 	HeapNode<Data>* parent(Data key);
-	HeapNode<Data>* parentHelper(Data key, HeapNode<Data>* node);
 };
 
 template<class Data>
