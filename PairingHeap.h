@@ -148,6 +148,9 @@ int PairingHeap<Data>::size()
 	return numItems;
 }
 
+
+/*Does what is essentially a depth first search of the tree, starting from the root,
+to find the parent of node with a specific key*/
 template<class Data>
 HeapNode<Data>* PairingHeap<Data>::parentHelper(Data key, HeapNode<Data>* node)
 {
@@ -201,21 +204,40 @@ void PairingHeap<Data>::decreaseKey(Data key, Data newKey)
 {
 	if (newKey < key)
 	{
+		/*If we're decreasing the priority of the 
+		root, no extra action is needed. Simply decrease
+		the key. Min-heap property will not be violated*/
 		if (root->key == key)
 		{
 			root->key = newKey;
 			return;
 		}
 
+		/*p is parent of node whose key we are going to decrease*/
 		HeapNode<Data>* p = parent(key);
+
+		/*If the node to be decreased is the left most child of p, then... */
 		if (p->left->key == key)
 		{
+			/*Make a new pointer to the node to be decreased, we are going to sever
+			its link from the tree*/
 			HeapNode<Data>* severedRoot = p->left;
-			severedRoot->key = newKey;
 			p->left = p->left->sibling;
 			severedRoot->sibling = NULL;
+
+			/*Now that the subtree rooted at the node to be decreased is severed
+			from the tree, we can decrease it's key without issue (it is the root
+			of its own tree now)*/
+			severedRoot->key = newKey;
+
+			/*If p is not the root, ...*/
 			if (p != root)
 			{
+				/*We need to find the grandparent of p, so that we can make
+				him point to the heap resulted from merging p and the severed root
+				instead of p. Although if p is not his leftmost child, we will actually
+				be changing the left sibling of p to point to the heap resulting from 
+				merging p and the severed root.*/
 				HeapNode<Data>* gp = parent(p->key);
 				if (gp->left == p)
 				{
@@ -233,22 +255,33 @@ void PairingHeap<Data>::decreaseKey(Data key, Data newKey)
 			}
 			else
 			{
+				/*p is the root, so we just change it to point to the root of the merged heaps.*/
 				root = merge(severedRoot, p);
 			}
 		}
 		else
 		{
+			/*the node to be decreased is not the leftmost child of p,
+			so we need to iterate through it's siblings to find it*/
 			HeapNode<Data>* pc = p->left;
 			while (pc->sibling->key != key)
 			{
 				pc = pc->sibling;
 			}
+
+			/*Sever the subtree rooted at the node whose key we wish to decrease
+			so we can decrease the key without consequence.*/
 			HeapNode<Data>* severedRoot = pc->sibling;
-			severedRoot->key = newKey;
 			pc->sibling = severedRoot->sibling;
 			severedRoot->sibling = NULL;
+			severedRoot->key = newKey;
+
+			/*If p is not the root, ...*/
 			if (p != root)
 			{
+				/*We need to find the grandparent of p, so that we can make
+				him point to the heap resulted from merging p and the severed root
+				instead of p.*/
 				HeapNode<Data>* gp = parent(p->key);
 				if (gp->left == p)
 				{
@@ -266,6 +299,7 @@ void PairingHeap<Data>::decreaseKey(Data key, Data newKey)
 			}
 			else
 			{
+				/*p is the root, so we just change it to point to the root of the merged heaps.*/
 				root = merge(severedRoot, p);
 			}
 		}
