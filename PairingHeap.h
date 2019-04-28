@@ -274,7 +274,7 @@ void PairingHeap<Data>::decreaseKey(Data key, Data newKey)
 		if (p->left->key == key)
 		{ 
 			/*Sever the subtree whose root is the node to be decreased
-		    from the tree*/
+		        from the tree*/
 			severedRoot = p->left;
 			p->left = p->left->sibling;
 			severedRoot->sibling = NULL;
