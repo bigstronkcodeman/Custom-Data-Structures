@@ -109,12 +109,14 @@ HeapNode<Data>* PairingHeap<Data>::merge(HeapNode<Data>* h1, HeapNode<Data>* h2)
 	{
 		h2->sibling = h1->left;
 		h1->left = h2;
+		h1->sibling = NULL;
 		return h1;
 	}
 	else
 	{
 		h1->sibling = h2->left;
 		h2->left = h1;
+		h2->sibling = NULL;
 		return h2;
 	}
 }
@@ -198,9 +200,9 @@ HeapNode<Data>* PairingHeap<Data>::parentHelper(Data key, HeapNode<Data>* node)
 template<class Data>
 HeapNode<Data>* PairingHeap<Data>::parentHelper(HeapNode<Data>* tbf, HeapNode<Data>* node)
 {
+//see line 256
 	if (node == NULL || (node == root && root == tbf))
 	{
-//see line 254
 		return NULL;
 	}
 
