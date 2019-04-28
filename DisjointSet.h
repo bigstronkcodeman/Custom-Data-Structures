@@ -103,6 +103,7 @@ bool DisjointSet<Data>::Union(int i, int j)
 	}
 	sets[iRoot].size += sets[jRoot].size;
 	numSets--;
+	return true;
 }
 
 template<class Data>

@@ -1,14 +1,49 @@
 #include "Graph.h"
 #include "DynamicArray.h"
-#include <cstdlib>
-#include <chrono>
+#include "PairingHeap.h"
 using namespace std;
-
-
 
 int main()
 {
-	Graph g(9, false);
+	PairingHeap<int> ph;
+	ph.insert(21);
+	ph.insert(5);
+	ph.insert(7);
+	ph.insert(51);
+	ph.insert(15);
+	ph.insert(99);
+	ph.insert(21);
+	ph.insert(12);
+	ph.insert(14);
+	ph.insert(1);
+	ph.insert(2);
+	ph.insert(3);
+	ph.insert(4);
+
+	ph.decreaseKey(14, 2);
+	ph.decreaseKey(2, 0);
+
+	for (int i = 0; i < 100; i++)
+	{
+		HeapNode<int>* node = ph.parent(i);
+		cout << "parent[" << i << "] ==> ";
+		if (node != NULL)
+		{
+			cout << node->key;
+		}
+		else
+		{
+			cout << "NIL";
+		}
+		cout << endl;
+	}
+
+
+
+
+
+
+	/*Graph g(9, false);
 	g.addEdge(0, 1, 10);
 	g.addEdge(0, 2, 12);
 	g.addEdge(1, 2, 9);
@@ -26,11 +61,17 @@ int main()
 	g.printAdjList();
 	DynamicArray<Edge> MST = g.kruskalMST();
 	cout << "minimum spanning tree edges: " << endl;
-	MST.print();
+	MST.print();*/
 
 	
 	
-	
+
+
+
+
+
+
+
 	/*DynamicArray<DynamicArray<int>> da(1);
 	for (int i = 0; i < 10; i++)
 	{
@@ -42,6 +83,15 @@ int main()
 		}
 	}
 	da.print();*/
+
+
+
+
+
+
+
+
+
 
 	/*int eles;
 	cout << "Enter a number of elements: ";

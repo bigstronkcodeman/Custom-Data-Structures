@@ -1,7 +1,10 @@
 #pragma once
 #include <iostream>
+#include <cmath>
 
 using namespace std;
+
+
 
 template<class Data>
 class DynamicArray
@@ -17,7 +20,7 @@ private:
 public:
 	DynamicArray();
 	DynamicArray(int capacityIn);
-	DynamicArray(int capacityIn, Data* in);
+	DynamicArray(Data* in, int sizeIn);
 	DynamicArray(const DynamicArray<Data>& other);
 	~DynamicArray();
 
@@ -26,6 +29,7 @@ public:
 	void insert(Data e, int i);
 	Data removeFront();
 	Data removeBack();
+	Data remove(int i);
 	bool isFull();
 	void print();
 	int length();
@@ -47,13 +51,15 @@ DynamicArray<Data>::DynamicArray(int capacityIn) : capacity(capacityIn), size(0)
 }
 
 template<class Data>
-DynamicArray<Data>::DynamicArray(int capacityIn, Data* in) : capacity(capacityIn), size(capacityIn)
+DynamicArray<Data>::DynamicArray(Data* in, int sizeIn)
 {
+	capacity = pow(2, ceil(log2(sizeIn)));
 	arr = new Data[capacity];
-	for (int i = 0; i < capacity; i++)
+	for (int i = 0; i < sizeIn; i++)
 	{
 		arr[i] = in[i];
 	}
+	size = sizeIn;
 }
 
 template<class Data>
@@ -193,6 +199,25 @@ Data DynamicArray<Data>::removeFront()
 }
 
 template<class Data>
+Data DynamicArray<Data>::remove(int i)
+{
+	Data result = arr[i];
+	
+	if (size - 1 < capacity / 2)
+	{
+		shrink();
+	}
+
+	for (int j = i + 1; j < size; j++)
+	{
+		arr[j - 1] = arr[j];
+	}
+
+	size--;
+	return result;
+}
+
+template<class Data>
 Data& DynamicArray<Data>::operator[](int index)
 {
 	return arr[index];
@@ -235,7 +260,7 @@ int DynamicArray<Data>::length()
 
 
 template<class Data>
-ostream& operator<<(ostream& os, DynamicArray<Data> da)
+ostream& operator<<(ostream& os, DynamicArray<Data>& da)
 {
 	for (int i = 0; i < da.length(); i++)
 	{

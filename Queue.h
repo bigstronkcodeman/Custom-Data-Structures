@@ -1,4 +1,3 @@
-#include <string>
 #include <iostream>
 
 #define DEFAULT_SIZE 10000

@@ -1,5 +1,3 @@
-#include "LinkedList.h"
-#include "DynamicArray.h"
 #pragma once
 
 template<class Data>
@@ -222,7 +220,6 @@ void PairingHeap<Data>::decreaseKey(Data key, Data newKey)
 				if (gp->left == p)
 				{
 					gp->left = merge(severedRoot, p);
-					return;
 				}
 				else
 				{
@@ -256,7 +253,6 @@ void PairingHeap<Data>::decreaseKey(Data key, Data newKey)
 				if (gp->left == p)
 				{
 					gp->left = merge(severedRoot, p);
-					return;
 				}
 				else
 				{

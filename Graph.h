@@ -4,6 +4,7 @@
 #include "Queue.h"
 #include "DynamicArray.h"
 #include "DisjointSet.h"
+#include "PairingHeap.h"
 
 #define DEFAULT_GRAPH_SIZE 10
 #define INF 2147483647
@@ -57,7 +58,7 @@ struct Edge
 {
 	Vertex* u;
 	Vertex* v;
-	int weight;
+	double weight;
 	EdgeType type;
 
 	Edge()
@@ -151,6 +152,7 @@ private:
 	void addDirectedEdge(int vfrom, int vto, int weight);
 	void addUndirectedEdge(int u, int v, int weight);
 	Edge* getEdge(int u, int v);
+	void relax(int u, int v, DynamicArray<int>& distance);
 
 public:
 	Graph();
@@ -180,6 +182,7 @@ public:
 	bool isAcyclic();
 	void sortEdges();
 	DynamicArray<Edge> kruskalMST();
+	DynamicArray<Edge> primMST();
 };
 
 Graph::Graph()
@@ -676,14 +679,56 @@ DynamicArray<Edge> Graph::kruskalMST()
 
 	sortEdges();
 
-	DynamicArray<Edge> MST;
+	DynamicArray<Edge> MSTedges;
 	for (int i = 0; i < edges.length(); i++)
 	{
 		if (ds.find(edges[i].u->id) != ds.find(edges[i].v->id))
 		{
-			MST.append(edges[i]);
+			MSTedges.append(edges[i]);
 			ds.Union(edges[i].u->id, edges[i].v->id);
 		}
 	}
-	return MST;
+	return MSTedges;
 }
+
+//DynamicArray<Edge> Graph::primMST()
+//{
+//	struct PrimVert
+//	{
+//		int id;
+//		int dist;
+//
+//		bool operator<(const PrimVert& other)
+//		{
+//			return dist < other.dist;
+//		}
+//
+//		bool operator>(const PrimVert& other)
+//		{
+//			return dist > other.dist;
+//		}
+//
+//		bool operator==(const PrimVert& other)
+//		{
+//			return dist == other.dist;
+//		}
+//	};
+//
+//	DynamicArray<PrimVert> vertices;
+//	for (int i = 0; i < vertCount; i++)
+//	{
+//		PrimVert pv;
+//		pv.id = i;
+//		pv.dist = INF;
+//		vertices.append(pv);
+//	}
+//	vertices[0].dist = 0;
+//
+//	PairingHeap<PrimVert&> ph;
+//	for (int i = 0; i < vertCount; i++)
+//	{
+//		ph.insert(vertices[i]);
+//	}
+//
+//
+//}
