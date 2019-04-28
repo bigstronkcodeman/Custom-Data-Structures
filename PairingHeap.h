@@ -29,6 +29,8 @@ private:
 
 	HeapNode<Data>* merge(HeapNode<Data>* h1, HeapNode<Data>* h2);
 	HeapNode<Data>* mergePairs(HeapNode<Data>* h);
+	HeapNode<Data>* parent(HeapNode<Data>* tbf);
+	HeapNode<Data>* parentHelper(HeapNode<Data>* tbf, HeapNode<Data>* node);
 	HeapNode<Data>* parentHelper(Data key, HeapNode<Data>* node);
 	void destructHelper(HeapNode<Data>* node);
 
@@ -149,10 +151,8 @@ int PairingHeap<Data>::size()
 }
 
 
-/*Does a sort of mix of breadth-first and depth-first search on the
-tree to find the parent of node with a specific key (start at root node, look at
-its children. if none of them are the key we're looking for, repeat this process for any
-one of those children who has its own children)*/
+/*Does what is essentially a depth first search of the tree, starting from the root,
+to find the parent of node with a specific key*/
 template<class Data>
 HeapNode<Data>* PairingHeap<Data>::parentHelper(Data key, HeapNode<Data>* node)
 {
@@ -196,9 +196,57 @@ HeapNode<Data>* PairingHeap<Data>::parentHelper(Data key, HeapNode<Data>* node)
 }
 
 template<class Data>
+HeapNode<Data>* PairingHeap<Data>::parentHelper(HeapNode<Data>* tbf, HeapNode<Data>* node)
+{
+	if (node == NULL || (node == root && root == tbf))
+	{
+		return NULL;
+	}
+
+	HeapNode<Data>* child = node->left;
+	while (child != NULL && child != tbf)
+	{
+		child = child->sibling;
+	}
+
+	if (child == NULL)
+	{
+		child = node->left;
+		HeapNode<Data>* p = NULL;
+		while (child != NULL)
+		{
+			if (child->left != NULL)
+			{
+				if (child->left == tbf)
+				{
+					return child;
+				}
+				p = parentHelper(tbf, child);
+			}
+			if (p != NULL)
+			{
+				return p;
+			}
+			child = child->sibling;
+		}
+		return NULL;
+	}
+	else
+	{
+		return node;
+	}
+}
+
+template<class Data>
 HeapNode<Data>* PairingHeap<Data>::parent(Data key)
 {
 	return parentHelper(key, root);
+}
+
+template<class Data>
+HeapNode<Data>* PairingHeap<Data>::parent(HeapNode<Data>* tbf)
+{
+	return parentHelper(tbf, root);
 }
 
 template<class Data>
@@ -262,7 +310,7 @@ void PairingHeap<Data>::decreaseKey(Data key, Data newKey)
 			instead of p. Although if p is not his leftmost child, we will actually
 			be changing the left sibling of p to point to the heap resulting from
 			merging p and the severed root.*/
-			HeapNode<Data>* gp = parent(p->key);
+			HeapNode<Data>* gp = parent(p);
 			if (gp->left == p)
 			{
 				gp->left = merge(severedRoot, p);
