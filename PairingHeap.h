@@ -265,6 +265,10 @@ void PairingHeap<Data>::decreaseKey(Data key, Data newKey)
 
 		/*p is parent of node whose key we are going to decrease*/
 		HeapNode<Data>* p = parent(key);
+		if (p == NULL)
+		{
+			return; //node with value 'key' is not in heap	
+		}
 
 		/*Make a new pointer to the node to be decreased, we are going to sever
 		its link from the tree*/
