@@ -33,7 +33,7 @@ int main()
 		}
 		else
 		{
-			cout << "NIL";
+			cout << "NOT IN HEAP";
 		}
 		cout << endl;
 	}
