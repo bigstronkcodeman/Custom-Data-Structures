@@ -1,98 +1,105 @@
 #pragma once
-#include <iostream>
+#pragma once
 
-#define DEFAULT_SIZE 10000
-
-using namespace std;
+const int DEFAULT_CAPACITY = 10;
 
 template <class Data>
 class Stack
 {
 private:
-	int size;
-	int topi;
-	Data* stack;
+	Data* items;
+	size_t _top;
+	size_t capacity;
+
+	void grow();
+	void shrink();
 
 public:
 	Stack();
-	Stack(int sizeIn);
 	~Stack();
 
-	bool push(Data key);
-	bool pop();
-	Data top();
-	bool isEmpty();
-	bool isFull();
-	void print();
+	void push(Data item);
+	void pop();
+	Data& top();
+	bool is_empty();
 };
 
 template <class Data>
-Stack<Data>::Stack()
-{
-	size = DEFAULT_SIZE;
-	stack = new Data[size];
-	topi = 0;
+Stack<Data>::Stack() {
+	capacity = DEFAULT_CAPACITY;
+	items = new Data[capacity];
+	_top = 0;
 }
 
 template <class Data>
-Stack<Data>::Stack(int sizeIn)
-{
-	size = sizeIn;
-	stack = new Data[size];
-	topi = 0;
+Stack<Data>::~Stack() {
+	delete[] items;
 }
 
 template <class Data>
-Stack<Data>::~Stack()
-{
-	delete[] stack;
-}
-
-template <class Data>
-bool Stack<Data>::isFull()
-{
-	return topi >= size;
-}
-
-template <class Data>
-bool Stack<Data>::isEmpty()
-{
-	return topi <= 0;
-}
-
-template <class Data>
-bool Stack<Data>::push(Data key)
-{
-	if (!isFull())
-	{
-		stack[topi++] = key;
-		return true;
+void Stack<Data>::grow() {
+	capacity *= 2;
+	Data* new_block = new Data[capacity];
+	for (size_t i = 0; i < _top; ++i) {
+		new_block[i] = items[i];
 	}
-	return false;
+	delete[] items;
+	items = new_block;
 }
 
 template <class Data>
-bool Stack<Data>::pop()
-{
-	if (!isEmpty())
-	{
-		topi--;
-		return true;
+void Stack<Data>::shrink() {
+	capacity /= 2;
+	Data* new_block = new Data[capacity];
+	for (size_t i = 0; i < _top; ++i) {
+		new_block[i] = items[i];
 	}
-	return false;
+	delete[] items;
+	items = new_block;
 }
 
 template <class Data>
-Data Stack<Data>::top()
-{
-	return stack[topi - 1];
-}
-
-template <class Data>
-void Stack<Data>::print()
-{
-	for (int i = topi - 1; i >= 0; i--)
-	{
-		cout << stack[i] << endl;
+void Stack<Data>::push(Data item) {
+	if (_top + 1 > capacity) {
+		grow();
 	}
+	items[_top++] = item;
+}
+
+template <class Data>
+void Stack<Data>::pop() {
+	try {
+		if (_top > 0) {
+			if (_top - 1 < capacity / 2) {
+				shrink();
+			}
+			--_top;
+		}
+		else {
+			throw "Stack is empty!";
+		}
+	}
+	catch (char const* err) {
+		std::cout << err << '\n';
+	}
+}
+
+template <class Data>
+Data& Stack<Data>::top() {
+	try {
+		if (_top > 0) {
+			return items[_top - 1];
+		}
+		else {
+			throw "Stack is empty!";
+		}
+	}
+	catch (char const* err) {
+		std::cout << err << '\n';
+	}
+}
+
+template <class Data>
+bool Stack<Data>::is_empty() {
+	return (_top == 0);
 }
